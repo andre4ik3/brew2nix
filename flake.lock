@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "data": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1729183334,
+        "narHash": "sha256-EI8U0W5MROQUxyqvnCJotvSqak8L95BIECm7e/FyZ6Q=",
+        "owner": "andre4ik3",
+        "repo": "brew2nix",
+        "rev": "f032f42d5847d2ecb68e4be8b05a7d28bba25a56",
+        "type": "github"
+      },
+      "original": {
+        "owner": "andre4ik3",
+        "ref": "data",
+        "repo": "brew2nix",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "locked": {
         "lastModified": 1717312683,
@@ -33,6 +50,7 @@
     },
     "root": {
       "inputs": {
+        "data": "data",
         "flake-compat": "flake-compat",
         "nixpkgs": "nixpkgs"
       }

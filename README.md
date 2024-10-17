@@ -20,7 +20,7 @@ general, you can just try to build it using a command like the following and
 see if it works (the app should be under `result/Applications`):
 
 ```bash
-nix build github:andre4ik3/brew2nix#packages.aarch64-darwin.casks.<APP_NAME> -L
+nix build github:andre4ik3/brew2nix#packages.aarch64-darwin.<APP_NAME> -L
 ```
 
 Non-exhaustive list of verified packages that work (tested personally):
@@ -126,7 +126,5 @@ To-Do
 - Some packages have separate `aarch64` and `x86_64` versions. Currently this isn't handled at all. I think `aarch64` is the default in most cases. I think.
 
 - Quarantine maybe? Would it break reproducibility?
-
-- Oh, almost forgot to mention: all the version data is currently just hardcoded in `cask.json`, in this repository. The file would somehow need to be versioned and fetched from its [unversioned original endpoint][1]. This is like priority #1 right now, I'm mostly just uploading this code so I can share it across machines.
 
 [1]: https://formulae.brew.sh/api/cask.json

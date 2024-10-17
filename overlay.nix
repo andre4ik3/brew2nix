@@ -1,8 +1,12 @@
+# from flake.nix:
+data:
+
+# from nixpkgs/when used as an overlay:
 final: prev:
 
 let
   lib = prev.lib;
-  casks = lib.trivial.importJSON ./cask.json;
+  casks = lib.trivial.importJSON "${data}/cask.json";
 in
 
 lib.trivial.pipe casks [
