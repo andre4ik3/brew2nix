@@ -1,7 +1,7 @@
 final: prev:
 
 let
-  lib = final.lib;
+  lib = prev.lib;
   casks = lib.trivial.importJSON ./cask.json;
 in
 

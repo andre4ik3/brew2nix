@@ -18,8 +18,8 @@
     ];
 
     overlays = rec {
-      brew2nix = default;
-      default = ./overlay.nix;
+      brew2nix = import ./overlay.nix;
+      default = brew2nix;
     };
 
     packages = forAllSystems (system:

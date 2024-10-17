@@ -4,7 +4,6 @@ stdenvNoCC.mkDerivation {
   pname = cask.token;
   version = cask.version;
   desktopName = builtins.elemAt cask.name 0;
-  dontFixup = true;
 
   src = fetchurl {
     url = cask.url;
@@ -30,8 +29,10 @@ stdenvNoCC.mkDerivation {
     esac
   '';
 
-  dontBuild = true;
+  dontPatch = true;
   dontConfigure = true;
+  dontBuild = true;
+  dontFixup = true;
   noDumpEnvVars = true;
 
   installPhase = ''
