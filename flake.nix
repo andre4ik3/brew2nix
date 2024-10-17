@@ -32,7 +32,22 @@
       let
         pkgs = import nixpkgs { inherit system; };
       in
-      (overlay pkgs pkgs).casks
+      overlay pkgs pkgs
+    );
+
+    devShells = forAllSystems (system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+      in
+      {
+        default = pkgs.mkShell {
+          packages = with pkgs; [
+            rustc
+            cargo
+            rust-analyzer
+          ];
+        };
+      }
     );
   };
 }

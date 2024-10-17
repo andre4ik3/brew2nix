@@ -1,4 +1,4 @@
-{ lib, stdenvNoCC, fetchurl, unzip, glibcLocalesUtf8, undmg, cask }:
+{ lib, stdenvNoCC, fetchurl, brew2nix, unzip, glibcLocalesUtf8, undmg, cask }:
 
 stdenvNoCC.mkDerivation {
   pname = cask.token;
@@ -10,8 +10,9 @@ stdenvNoCC.mkDerivation {
     sha256 = cask.sha256;
   };
 
-  nativeBuildInputs = [ unzip glibcLocalesUtf8 undmg ];
+  nativeBuildInputs = [ brew2nix unzip glibcLocalesUtf8 undmg ];
   unpackPhase = ''
+    brew2nix unpack
     EXTRACT_DIR="$TMPDIR/extract"
     mkdir -p "$EXTRACT_DIR"
     cd "$EXTRACT_DIR"
@@ -36,6 +37,7 @@ stdenvNoCC.mkDerivation {
   noDumpEnvVars = true;
 
   installPhase = ''
+    brew2nix install
     EXTRACT_DIR="$TMPDIR/extract"
     APP_DIR="$out/Applications"
 

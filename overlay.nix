@@ -7,6 +7,7 @@ final: prev:
 let
   lib = prev.lib;
   casks = lib.trivial.importJSON "${data}/cask.json";
+  brew2nix = final.callPackage ./packages/brew2nix.nix { };
 in
 
 lib.trivial.pipe casks [
@@ -16,12 +17,15 @@ lib.trivial.pipe casks [
   # Convert cask data to actual packages, in the format for listToAttrs
   (builtins.map (cask: {
     name = cask.token;
-    value = final.callPackage ./package.nix { inherit cask; };
+    value = final.callPackage ./packages/cask-template.nix { inherit brew2nix cask; };
   }))
 
   # Convert list of { name = "...", value = "..." } to attrset ("object")
   builtins.listToAttrs
 
-  # Put all casks neatly under pkgs.casks
-  (allCasks: { casks = allCasks; })
+  # Put all casks neatly under pkgs.casks, and the helper brew2nix package
+  (allCasks: {
+    casks = allCasks;
+    brew2nix = brew2nix;
+  })
 ]

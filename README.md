@@ -20,7 +20,7 @@ general, you can just try to build it using a command like the following and
 see if it works (the app should be under `result/Applications`):
 
 ```bash
-nix build github:andre4ik3/brew2nix#packages.aarch64-darwin.<APP_NAME> -L
+nix build github:andre4ik3/brew2nix#packages.aarch64-darwin.casks.<APP_NAME> -L
 ```
 
 Non-exhaustive list of verified packages that work (tested personally):
