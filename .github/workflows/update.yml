@@ -1,0 +1,26 @@
+name: "Update data"
+on:
+  push:
+    branches:
+      - data
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    name: "Update data"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: data
+          fetch-depth: 0
+
+      - name: "Update data"
+        run: |
+          curl -LO "https://formulae.brew.sh/api/cask.json"
+
+      - uses: EndBug/add-and-commit@v9
+        with: { default_author: github_actions }
