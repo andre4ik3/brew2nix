@@ -43,16 +43,19 @@ Non-exhaustive list of verified packages that work (tested personally):
 - `transmission`
 - `transmit`
 - `betterdisplay`
+- `raycast`
+- `syncthing`
+- `cleanshot`
+- `ghostty`
+  - It will say that it's damaged, but you can allow it in Privacy & Security. TODO: figure out why it says it's damaged (codesigning seems ok?)
+- `microsoft-word`, `microsoft-excel`, `microsoft-powerpoint` (`.pkg`'s!!)
 - ...probably most `.zip` and `.dmg` packages. Again, check using command above. (no need to install to check, just need Nix installed)
 
 List of stuff that DOESN'T work:
 
 - `apparency`, `suspicious-package`, `istat-menus@6` (No sha256 on the top-level download)
-- `cleanshot` (`undmg` doesn't support its DMG filesystem)
 - `bettertouchtool` (resources get modified for some reason)
-- MS Office (`.pkg`)
-- Pretty much anything that is `.pkg`
-- `raycast`, `lagrange` (no file extension on downloaded file -- fix by detecting file type using file magic)
+- `.pkg` files that need to run scripts
 - Anything that hard-requires to be in `/Applications` (e.g. `little-snitch` or `secretive`)
 
 Usage

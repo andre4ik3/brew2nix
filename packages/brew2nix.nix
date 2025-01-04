@@ -1,10 +1,6 @@
-{ lib, rustPlatform }:
+{ writeShellScriptBin, deno, lib }:
 
-rustPlatform.buildRustPackage {
-  pname = "brew2nix";
-  version = "0.1.0";
+writeShellScriptBin "brew2nix" ''
+exec ${lib.getExe deno} run --allow-all --no-config '${./brew2nix.ts}' "$@"
+''
 
-  src = ../brew2nix;
-
-  cargoHash = "sha256-XupYZY7JIT9cpxaaOF/wFs7tWT41OppqFdKh3EPYLUQ=";
-}

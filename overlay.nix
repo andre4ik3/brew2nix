@@ -6,18 +6,17 @@ final: prev:
 
 let
   lib = prev.lib;
-  casks = lib.trivial.importJSON "${data}/cask.json";
   brew2nix = final.callPackage ./packages/brew2nix.nix { };
+  casks = lib.trivial.importJSON (prev.runCommand "converted-data" {
+    src = "${data}/cask.json";
+  } "${brew2nix}/bin/brew2nix convert");
 in
 
 lib.trivial.pipe casks [
-  # Only get packages that have a sha256 hash
-  (builtins.filter (x: (builtins.stringLength x.sha256) == 64))
-
   # Convert cask data to actual packages, in the format for listToAttrs
   (builtins.map (cask: {
-    name = cask.token;
-    value = final.callPackage ./packages/cask-template.nix { inherit brew2nix cask; };
+    name = cask.name;
+    value = final.callPackage ./packages/cask-template.nix { inherit cask brew2nix; };
   }))
 
   # Convert list of { name = "...", value = "..." } to attrset ("object")
