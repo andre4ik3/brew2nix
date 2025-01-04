@@ -45,9 +45,6 @@ stdenvNoCC.mkDerivation {
     cd "$EXTRACT_DIR"
     type="$(file -b "$src")"
     case "$type" in
-      "Zip archive data"*)
-        bsdunzip "$src"
-        ;;
       "bzip2 compressed data"*)
         # either it's a tar.bz2 or a dmg...
         if dmg2img -l "$src"; then
@@ -68,6 +65,9 @@ stdenvNoCC.mkDerivation {
         ;;
       "lzfse encoded, lzvn compressed")
         7zz x -snld "$src" || true # ignore "dangerous symlink" errors
+        ;;
+      "Zip archive data"* | "data") # backup/fallback in case `file` doesn't know what it is
+        bsdunzip "$src"
         ;;
       *)
         echo "Unsupported file type: $type"
