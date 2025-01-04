@@ -7,7 +7,7 @@ final: prev:
 let
   lib = prev.lib;
   brew2nix = final.callPackage ./packages/brew2nix.nix { };
-  casks = lib.trivial.importJSON (prev.runCommand "converted-data" {
+  casks = lib.trivial.importJSON (final.runCommand "converted-data" {
     src = "${data}/cask.json";
   } "${brew2nix}/bin/brew2nix convert");
 in
