@@ -84,8 +84,10 @@ async function extract() {
       const relativePath = path.replace("$APPDIR", outPath + "/Applications");
       const relativeTarget = target.replace("$HOMEBREW_PREFIX", outPath);
 
-      await Deno.mkdir(relativeTarget.split("/").slice(0, -1).join("/"), { recursive: true });
-      await Deno.symlink(relativePath, relativeTarget);
+      const finalTarget = relativeTarget.includes("/") ? relativeTarget : `${outPath}/bin/${relativeTarget}`;
+
+      await Deno.mkdir(finalTarget.split("/").slice(0, -1).join("/"), { recursive: true });
+      await Deno.symlink(relativePath, finalTarget);
     } else if ("manpage" in artifact) {
       const [path] = artifact.manpage;
       const relativePath = path.replace("$APPDIR", outPath + "/Applications").split("/").slice(-3);

@@ -1,4 +1,25 @@
-{ stdenvNoCC, writeText, fetchurl, undmg, xar, libarchive, _7zz, glibcLocalesUtf8, cask, brew2nix }:
+{
+  # base dependencies
+  stdenvNoCC,
+  writeText,
+  fetchurl,
+
+  # cask data
+  cask,
+
+  # uncompressing stuff
+  undmg,
+  xar,
+  libarchive,
+  _7zz,
+  glibcLocalesUtf8,
+
+  # for dmg heuristics
+  dmg2img,
+
+  # extraction helper
+  brew2nix
+}:
 
 let
   src = if stdenvNoCC.targetPlatform.isAarch64 then cask.src.aarch64-darwin else cask.src.x86_64-darwin;
@@ -17,7 +38,7 @@ stdenvNoCC.mkDerivation {
 
   buildInputs = [ brew2nix ];
 
-  nativeBuildInputs = [ undmg xar libarchive _7zz glibcLocalesUtf8 ];
+  nativeBuildInputs = [ undmg xar libarchive _7zz glibcLocalesUtf8 dmg2img ];
   unpackPhase = ''
     EXTRACT_DIR="$TMPDIR/extract"
     mkdir -p "$EXTRACT_DIR"
@@ -28,7 +49,14 @@ stdenvNoCC.mkDerivation {
         bsdunzip "$src"
         ;;
       "bzip2 compressed data"*)
-        bsdtar --xattrs -xjpf "$src" --preserve-permissions --xattrs
+        # either it's a tar.bz2 or a dmg...
+        if dmg2img -l "$src"; then
+          echo "looks like a dmg"
+          7zz x -snld "$src" || true # ignore "dangerous symlink" errors
+        else
+          echo "looks like a tar"
+          bsdtar --xattrs -xjpf "$src" --preserve-permissions --xattrs
+        fi
         ;;
       "zlib compressed data")
         undmg "$src"
@@ -39,7 +67,7 @@ stdenvNoCC.mkDerivation {
         find . -name "Payload" -type f -exec sh -c 'cat {} | gunzip -dc | bsdcpio -i' \;
         ;;
       "lzfse encoded, lzvn compressed")
-        7zz x -snld "$src"
+        7zz x -snld "$src" || true # ignore "dangerous symlink" errors
         ;;
       *)
         echo "Unsupported file type: $type"
