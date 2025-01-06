@@ -86,11 +86,14 @@ async function extract() {
 
       const finalTarget = relativeTarget.includes("/") ? relativeTarget : `${outPath}/bin/${relativeTarget}`;
 
+      if (relativePath.includes("$")) continue;
+
       await Deno.mkdir(finalTarget.split("/").slice(0, -1).join("/"), { recursive: true });
       await Deno.symlink(relativePath, finalTarget);
     } else if ("manpage" in artifact) {
       const [path] = artifact.manpage;
       const relativePath = path.replace("$APPDIR", outPath + "/Applications").split("/").slice(-3);
+      if (relativePath.includes("$")) continue;
     }
   }
 }

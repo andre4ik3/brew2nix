@@ -8,7 +8,6 @@
   cask,
 
   # uncompressing stuff
-  undmg,
   xar,
   libarchive,
   _7zz,
@@ -17,12 +16,15 @@
   # for dmg heuristics
   dmg2img,
 
+  darwin,
+
   # extraction helper
   brew2nix
 }:
 
 let
-  src = if stdenvNoCC.targetPlatform.isAarch64 then cask.src.aarch64-darwin else cask.src.x86_64-darwin;
+  srcArch = if stdenvNoCC.targetPlatform.isAarch64 then cask.src.aarch64-darwin else cask.src.x86_64-darwin;
+  src = if srcArch == null then throw "cask ${cask.name} is not available for ${stdenvNoCC.targetPlatform.system}" else srcArch;
   caskJSON = writeText "${cask.name}.json" (builtins.toJSON cask);
 in
 
@@ -38,7 +40,7 @@ stdenvNoCC.mkDerivation {
 
   buildInputs = [ brew2nix ];
 
-  nativeBuildInputs = [ undmg xar libarchive _7zz glibcLocalesUtf8 dmg2img ];
+  nativeBuildInputs = [ xar libarchive _7zz glibcLocalesUtf8 dmg2img darwin.file_cmds ];
   unpackPhase = ''
     EXTRACT_DIR="$TMPDIR/extract"
     mkdir -p "$EXTRACT_DIR"
@@ -56,7 +58,8 @@ stdenvNoCC.mkDerivation {
         fi
         ;;
       "zlib compressed data")
-        undmg "$src"
+        #undmg "$src"
+        7zz x -snld "$src" || true # ignore "dangerous symlink" errors
         ;;
       "xar archive compressed"*)
         # Terribly hacky BUT IT WORKS
@@ -89,5 +92,6 @@ stdenvNoCC.mkDerivation {
     mkdir -p "$APP_DIR"
     find "$EXTRACT_DIR" -name "*.app" -type d -prune -exec mv {} "$APP_DIR" \;
     src="${caskJSON}" brew2nix extract
+    xattr -cr "$out"
   '';
 }

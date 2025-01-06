@@ -28,6 +28,7 @@ Non-exhaustive list of verified packages that work (tested personally):
 - `arc`
 - `iterm2`
 - `firefox`
+  - Caveat: the CLI wrapper script doesn't work (yet)
 - `sketch`
 - `zen-browser`
 - `eloston-chromium`
@@ -47,7 +48,7 @@ Non-exhaustive list of verified packages that work (tested personally):
 - `syncthing`
 - `cleanshot`
 - `ghostty`
-  - It will say that it's damaged, but you can allow it in Privacy & Security. TODO: figure out why it says it's damaged (codesigning seems ok?)
+- `lagrange`
 - `microsoft-word`, `microsoft-excel`, `microsoft-powerpoint` (`.pkg`'s!!)
 - ...probably most `.zip` and `.dmg` packages. Again, check using command above. (no need to install to check, just need Nix installed)
 
@@ -70,6 +71,7 @@ Add it as an input in your flake:
     brew2nix = {
       url = "github:andre4ik3/brew2nix";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.data.url = "github:andre4ik3/brew2nix/data"; # keeps cask versions up-to-date
     };
     # ... other stuff ...
   };
@@ -114,19 +116,11 @@ Caveats
 -------
 
 - Apps trying to update themselves will fail. This is intentional, of course -- updates are exclusively managed via Nix.
+- `nix-collect-garbage` won't work for packages downloaded by `brew2nix` until you grant `nix` Full Disk Access in Privacy & Security. (The first time it fails, just go to Privacy & Security, and `nix` will show up there. Grant it access and you should be good to go.)
+- Some apps say that they are damaged, but you can allow them to run in Privacy & Security. TODO: figure out why they say they're damaged (codesigning seems ok?)
 
 To-Do
 -----
-
-- Currently the extraction is just a very simple script that uses unzip or undmg depending on the file extension.
-
-- Almost no information from Homebrew is used. The script (see `package.nix`) simply finds `.app` files and moves them to an `Applications` directory.
-
-- To make this "proper", essentially a small Homebrew re-implementation needs to be created. This re-implementation can then parse the cask JSON file, like Homebrew would, and move things to the correct places from data supplied from Homebrew, instead of just guessing.
-
-- Instead of using `undmg`, it should use built-in macOS utilities (aka `hdiutil`).
-
-- Some packages have separate `aarch64` and `x86_64` versions. Currently this isn't handled at all. I think `aarch64` is the default in most cases. I think.
 
 - Quarantine maybe? Would it break reproducibility?
 
