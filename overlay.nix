@@ -12,6 +12,7 @@ in
 
 {
   casks = lib.trivial.pipe casks [
+    # Map raw Homebrew cask data to some more friendly data for working with Nix
     (builtins.map (cask:
       let
         intelVariation = if cask?variations?sequoia?sha256 && builtins.stringLength cask.variations.sequoia.sha256 == 64 then cask.variations.sequoia else null;
@@ -31,6 +32,7 @@ in
             else if normalVariation != null then normalVariation
               else throw "Cask ${cask.token} is not available for aarch64-darwin";
         };
+        _passthru = cask;
       }
     ))
 
