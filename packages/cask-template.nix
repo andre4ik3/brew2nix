@@ -91,7 +91,7 @@ stdenvNoCC.mkDerivation {
 
     mkdir -p "$APP_DIR"
     find "$EXTRACT_DIR" -name "*.app" -type d -prune -exec mv {} "$APP_DIR" \;
-    src="${caskJSON}" brew2nix extract
+    src="${caskJSON}" brew2nix
     xattr -cr "$out"
   '';
 }
