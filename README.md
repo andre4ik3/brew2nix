@@ -49,13 +49,13 @@ Non-exhaustive list of verified packages that work (tested personally):
 - `cleanshot`
 - `ghostty`
 - `lagrange`
+- `bettertouchtool`
 - `microsoft-word`, `microsoft-excel`, `microsoft-powerpoint` (`.pkg`'s!!)
 - ...probably most `.zip` and `.dmg` packages. Again, check using command above. (no need to install to check, just need Nix installed)
 
 List of stuff that DOESN'T work:
 
 - `apparency`, `suspicious-package`, `istat-menus@6` (No sha256 on the top-level download)
-- `bettertouchtool` (resources get modified for some reason)
 - `.pkg` files that need to run scripts
 - Anything that hard-requires to be in `/Applications` (e.g. `little-snitch` or `secretive`)
 
@@ -117,7 +117,6 @@ Caveats
 
 - Apps trying to update themselves will fail. This is intentional, of course -- updates are exclusively managed via Nix.
 - `nix-collect-garbage` won't work for packages downloaded by `brew2nix` until you grant `nix` Full Disk Access in Privacy & Security. (The first time it fails, just go to Privacy & Security, and `nix` will show up there. Grant it access and you should be good to go.)
-- Some apps say that they are damaged, but you can allow them to run in Privacy & Security. TODO: figure out why they say they're damaged (codesigning seems ok?)
 
 To-Do
 -----

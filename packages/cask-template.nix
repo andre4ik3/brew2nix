@@ -92,6 +92,9 @@ stdenvNoCC.mkDerivation {
     mkdir -p "$APP_DIR"
     find "$EXTRACT_DIR" -name "*.app" -type d -prune -exec mv {} "$APP_DIR" \;
     src="${caskJSON}" brew2nix
+
+    # Clean up some oddities from some extraction methods
     xattr -cr "$out"
+    find "$APP_DIR" -name "*:*" -type f -exec rm -f {} \; # this is how 7-zip does xattrs
   '';
 }
