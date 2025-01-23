@@ -38,9 +38,16 @@ stdenvNoCC.mkDerivation {
     inherit (src) url sha256;
   };
 
-  buildInputs = [ brew2nix ];
+  nativeBuildInputs = [
+    brew2nix
+    xar
+    libarchive
+    _7zz
+    glibcLocalesUtf8
+    dmg2img
+    darwin.file_cmds
+  ];
 
-  nativeBuildInputs = [ xar libarchive _7zz glibcLocalesUtf8 dmg2img darwin.file_cmds ];
   unpackPhase = ''
     EXTRACT_DIR="$TMPDIR/extract"
     mkdir -p "$EXTRACT_DIR"

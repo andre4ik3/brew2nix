@@ -117,6 +117,8 @@ Caveats
 
 - Apps trying to update themselves will fail. This is intentional, of course -- updates are exclusively managed via Nix.
 - `nix-collect-garbage` won't work for packages downloaded by `brew2nix` until you grant `nix` Full Disk Access in Privacy & Security. (The first time it fails, just go to Privacy & Security, and `nix` will show up there. Grant it access and you should be good to go.)
+- Spotlight and Launchpad won't work with the installed apps properly. Raycast works perfectly though.
+- Might have two instances of apps open when rebuilding (or more if frequently!).
 
 To-Do
 -----
