@@ -90,6 +90,7 @@ stdenvNoCC.mkDerivation {
   dontConfigure = true;
   dontBuild = true;
   dontFixup = true;
+  dontUpdateAutotoolsGnuConfigScripts = true;
   noDumpEnvVars = true;
 
   installPhase = ''

@@ -51,6 +51,7 @@ Non-exhaustive list of verified packages that work (tested personally):
 - `lagrange`
 - `bettertouchtool`
 - `microsoft-word`, `microsoft-excel`, `microsoft-powerpoint` (`.pkg`'s!!)
+- `visual-studio-code`, `vscodium`, `cursor`
 - ...probably most `.zip` and `.dmg` packages. Again, check using command above. (no need to install to check, just need Nix installed)
 
 List of stuff that DOESN'T work:
@@ -68,11 +69,19 @@ Add it as an input in your flake:
 {
   inputs = {
     # ... other stuff ...
+
+    # auto daily-updated cask data from Homebrew API
+    casks = {
+      url = "github:andre4ik3/brew2nix/data";
+      flake = false;
+    };
+
     brew2nix = {
       url = "github:andre4ik3/brew2nix";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.data.url = "github:andre4ik3/brew2nix/data"; # keeps cask versions up-to-date
+      inputs.data.follows = "casks";
     };
+
     # ... other stuff ...
   };
 
@@ -116,9 +125,9 @@ Caveats
 -------
 
 - Apps trying to update themselves will fail. This is intentional, of course -- updates are exclusively managed via Nix.
-- `nix-collect-garbage` won't work for packages downloaded by `brew2nix` until you grant `nix` Full Disk Access in Privacy & Security. (The first time it fails, just go to Privacy & Security, and `nix` will show up there. Grant it access and you should be good to go.)
+- Garbage collection won't work for apps downloaded by `brew2nix` until you grant `nix` Full Disk Access in Privacy & Security, as the apps are protected by macOS under the new "app data protection". (The first time it fails, just go to Privacy & Security, and `nix` will show up there. Grant it access and you should be good to go.)
 - Spotlight and Launchpad won't work with the installed apps properly. Raycast works perfectly though.
-- Might have two instances of apps open when rebuilding (or more if frequently!).
+- Might have two instances of apps open when rebuilding (or more if frequently!). Solution is to `darwin-rebuild switch`, then fully reboot (to clean up all running apps), then run GC.
 
 To-Do
 -----

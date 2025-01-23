@@ -3,11 +3,11 @@
     "data": {
       "flake": false,
       "locked": {
-        "lastModified": 1737590498,
-        "narHash": "sha256-XgMqPIlmD6Z/xpspiE7q2rnRRdDIifodZRZ0+wd4tc8=",
+        "lastModified": 1737606622,
+        "narHash": "sha256-KHSLkIpGg/YZSm0nfJTjgHgiTWs2y3TQ2KhHkacc2yk=",
         "owner": "andre4ik3",
         "repo": "brew2nix",
-        "rev": "0b85694bb93a0f56a8894a86cdb3fd22c52c0ea5",
+        "rev": "c41e240df00df8ceba41be33c5bca07b988d0ea5",
         "type": "github"
       },
       "original": {
@@ -34,11 +34,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1737525964,
-        "narHash": "sha256-3wFonKmNRWKq1himW9N3TllbeGIHFACI5vmLpk6moF8=",
+        "lastModified": 1737557748,
+        "narHash": "sha256-BaMuhctP1x00+8cBE2cJveJQb70/tWHI50MHj/ZrtOY=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "5757bbb8bd7c0630a0cc4bb19c47e588db30b97c",
+        "rev": "606996d74f6e2a12635d41c1bf58bfc7ea3bb5ec",
         "type": "github"
       },
       "original": {
