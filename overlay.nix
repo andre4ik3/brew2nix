@@ -6,7 +6,7 @@ final: prev:
 
 let
   lib = prev.lib;
-  brew2nix = prev.callPackage ./packages/brew2nix.nix { };
+  brew2nix = prev.callPackage ./packages/brew2nix { };
   casks = lib.trivial.importJSON "${data}/cask.json";
 in
 

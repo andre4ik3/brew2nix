@@ -32,7 +32,9 @@
       let
         pkgs = import nixpkgs { inherit system; };
       in
-      overlay pkgs pkgs
+      {
+        brew2nix = pkgs.callPackage ./packages/brew2nix { };
+      } // (overlay pkgs pkgs).casks
     );
   };
 }
