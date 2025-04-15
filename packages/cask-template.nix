@@ -98,7 +98,7 @@ stdenvNoCC.mkDerivation {
     APP_DIR="$out/Applications"
 
     mkdir -p "$APP_DIR"
-    find "$EXTRACT_DIR" -name "*.app" -type d -prune -exec mv {} "$APP_DIR" \;
+    find "$EXTRACT_DIR" -name "*.app" -type d -prune -exec cp -R {} "$APP_DIR"/ \;
     src="${caskJSON}" brew2nix
 
     # Clean up some oddities from some extraction methods
