@@ -2,7 +2,7 @@
   description = "Access Homebrew casks from Nix";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-25.05";
     flake-compat.url = "github:nix-community/flake-compat";
 
     data = {
@@ -11,30 +11,29 @@
     };
   };
 
-  outputs = { nixpkgs, data, ... }:
-  let
+  outputs = { self, nixpkgs, data, ... }: let
+    inherit (nixpkgs) lib;
     systems = [ "aarch64-darwin" "x86_64-darwin" ];
-    forAllSystems = nixpkgs.lib.genAttrs systems;
-    overlay = import ./overlay.nix data;
   in
   {
-    lib.supportedSystems = [
-      "aarch64-darwin"
-      "x86_64-darwin"
-    ];
+    lib.supportedSystems = systems;
 
     overlays = rec {
-      brew2nix = overlay;
-      default = brew2nix;
+      homebrew-casks = import ./overlay.nix data;
+      brew2nix = homebrew-casks;
+      default = homebrew-casks;
     };
 
-    packages = forAllSystems (system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-      in
-      {
-        brew2nix = pkgs.callPackage ./packages/brew2nix { };
-      } // (overlay pkgs pkgs).casks
-    );
+    packages = lib.genAttrs systems (system: let
+      pkgs = nixpkgs.legacyPackages.${system};
+    in (self.overlays.homebrew-casks pkgs pkgs).casks);
+
+    devShells = lib.genAttrs systems (system: let
+      pkgs = nixpkgs.legacyPackages.${system};
+    in {
+      default = pkgs.mkShell {
+        packages = [ pkgs.python3 ];
+      };
+    });
   };
 }

@@ -4,8 +4,8 @@
   writeText,
   fetchurl,
 
-  # cask data
-  cask,
+  # package data
+  package,
 
   # uncompressing stuff
   xar,
@@ -17,29 +17,25 @@
   dmg2img,
 
   darwin,
-
-  # extraction helper
-  brew2nix
 }:
 
 let
-  srcArch = if stdenvNoCC.targetPlatform.isAarch64 then cask.src.aarch64-darwin else cask.src.x86_64-darwin;
-  src = if srcArch == null then throw "cask ${cask.name} is not available for ${stdenvNoCC.targetPlatform.system}" else srcArch;
-  caskJSON = writeText "${cask.name}.json" (builtins.toJSON cask);
+  inherit (stdenvNoCC.targetPlatform) system;
+  srcArch = package.files.${system};
+  src = if srcArch == null then throw "cask ${package.name} is not available for ${system}" else srcArch;
 in
 
 stdenvNoCC.mkDerivation {
-  pname = cask.name;
-  version = cask.version;
-  desktopName = cask.desktopName;
+  pname = package.name;
+  inherit (src) version;
+  inherit (package) desktopName;
 
   src = fetchurl {
-    name = cask.name;
-    inherit (src) url sha256;
+    pname = package.name;
+    inherit (src) version url hash;
   };
 
   nativeBuildInputs = [
-    brew2nix
     xar
     libarchive
     _7zz
@@ -95,14 +91,13 @@ stdenvNoCC.mkDerivation {
 
   installPhase = ''
     EXTRACT_DIR="$TMPDIR/extract"
-    APP_DIR="$out/Applications"
+    APPDIR="$out/Applications"
 
-    mkdir -p "$APP_DIR"
-    find "$EXTRACT_DIR" -name "*.app" -type d -prune -exec cp -R {} "$APP_DIR"/ \;
-    src="${caskJSON}" brew2nix
+    mkdir -p "$APPDIR"
+    find "$EXTRACT_DIR" -name "*.app" -type d -prune -exec cp -R {} "$APPDIR"/ \;
 
     # Clean up some oddities from some extraction methods
     xattr -cr "$out"
-    find "$APP_DIR" -name "*:*" -type f -exec rm -f {} \; # this is how 7-zip does xattrs
+    find "$APPDIR" -name "*:*" -type f -exec rm -f {} \; # this is how 7-zip does xattrs
   '';
 }

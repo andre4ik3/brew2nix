@@ -5,44 +5,26 @@ data:
 final: prev:
 
 let
-  lib = prev.lib;
-  brew2nix = prev.callPackage ./packages/brew2nix { };
-  casks = lib.trivial.importJSON "${data}/cask.json";
+  inherit (final) lib;
+
+  mkPackage = name: let
+    prefix = lib.substring 0 2 (builtins.trace "evaluating ${name}" name);
+    package = lib.importJSON "${data}/packages/${prefix}/${name}.json";
+  in final.callPackage ./packages/cask-template.nix { inherit package; };
+
+  # A map of each package name/alias to the canonical package name.
+  packageNameMap = lib.importJSON "${data}/package-names.json";
+
+  # A list of only canonical package names.
+  packageNames = lib.attrValues packageNameMap;
+
+  # A map of canonical package names to packages.
+  packages = lib.listToAttrs (lib.map (name: lib.nameValuePair name (mkPackage name)) packageNames);
+
+  # A map of alias names to packages.
+  packagesWithAliases = lib.mapAttrs (alias: name: packages.${name}) packageNameMap;
 in
 
 {
-  casks = lib.trivial.pipe casks [
-    # Map raw Homebrew cask data to some more friendly data for working with Nix
-    (builtins.map (cask:
-      let
-        intelVariation = if cask?variations?sequoia?sha256 && builtins.stringLength cask.variations.sequoia.sha256 == 64 then cask.variations.sequoia else null;
-        armVariation = if cask?variations?arm64_sequoia?sha256 && builtins.stringLength cask.variations.arm64_sequoia.sha256 == 64 then cask.variations.arm64_sequoia else null;
-        normalVariation = if cask?sha256 && builtins.stringLength cask.sha256 == 64 then { inherit (cask) url sha256; } else null;
-      in
-      {
-        name = cask.token;
-        version = cask.version;
-        desktopName = builtins.elemAt cask.name 0;
-        src = {
-          x86_64-darwin = if intelVariation != null then intelVariation
-            else if normalVariation != null then normalVariation
-              else throw "Cask ${cask.token} is not available for x86_64-darwin";
-
-          aarch64-darwin = if armVariation != null then armVariation
-            else if normalVariation != null then normalVariation
-              else throw "Cask ${cask.token} is not available for aarch64-darwin";
-        };
-        _passthru = cask;
-      }
-    ))
-
-    # Convert cask data to actual packages, in the format for listToAttrs
-    (builtins.map (cask: {
-      name = cask.name;
-      value = prev.callPackage ./packages/cask-template.nix { inherit cask brew2nix; };
-    }))
-
-    # Convert list of { name = "...", value = "..." } to attrset ("object")
-    builtins.listToAttrs
-  ];
+  casks = packagesWithAliases;
 }

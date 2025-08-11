@@ -1,12 +1,9 @@
-brew2nix
-========
+nix-homebrew-casks
+==================
 
-> [!CAUTION]
-> **‼️ VERY EXPERIMENTAL ‼️**
-
-A very experimental way of installing Homebrew casks via Nix, in a reproducible
-way, and **without needing to have Homebrew installed.** It pulls its data from
-[Homebrew's API][1] and transforms that into Nix packages.
+Exposes Homebrew casks as Nix packages, in a reproducible way, and **without
+needing to have Homebrew installed.** It pulls its data from [Homebrew's
+API][1] and transforms that into Nix packages.
 
 The goal for this project is simple: if Homebrew is just being used to install
 casks (either imperatively or via `nix-darwin`), this aims to replace it. This
@@ -20,7 +17,7 @@ general, you can just try to build it using a command like the following and
 see if it works (the app should be under `result/Applications`):
 
 ```bash
-nix build github:andre4ik3/brew2nix#packages.aarch64-darwin.casks.<APP_NAME> -L
+nix build github:andre4ik3/nix-homebrew-casks#<APP_NAME> -L
 ```
 
 Non-exhaustive list of verified packages that work (tested personally):
@@ -63,71 +60,60 @@ List of stuff that DOESN'T work:
 Usage
 -----
 
-Add it as an input in your flake:
+The cask data files are stored in a separate branch from the code (to allow
+pinning the cask versions separately from the code):
 
 ```nix
 {
   inputs = {
     # ... other stuff ...
 
-    # auto daily-updated cask data from Homebrew API
-    casks = {
-      url = "github:andre4ik3/brew2nix/data";
+    # auto daily-updated cask data from Homebrew servers
+    homebrew-casks = {
+      url = "github:andre4ik3/nix-homebrew-casks/data";
       flake = false;
     };
 
-    brew2nix = {
-      url = "github:andre4ik3/brew2nix";
+    nix-homebrew-casks = {
+      url = "github:andre4ik3/nix-homebrew-casks";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.data.follows = "casks";
+      inputs.data.follows = "homebrew-casks";
     };
 
     # ... other stuff ...
   };
 
-  outputs = { ... }: {
-    # ...
+  outputs = { nix-homebrew-casks, nixpkgs, ... }: {
+    nixosConfigurations.exampleSystem = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        ./some-module.nix
+        # ... other stuff ...
+        {
+          nixpkgs.overlays = [ nix-homebrew-casks.overlays.default ];
+        }
+        # ... other stuff ...
+      ];
+    };
   };
-}
-```
-
-Then add it as an overlay:
-
-```nix
-# assuming brew2nix is this exact flake, passed via specialArgs or something
-
-{ brew2nix, pkgs }:
-
-{
-  nixpkgs.overlays = [ brew2nix.overlays.default ];
-
-  # then, simply:
-  environment.systemPackages = with pkgs.casks; [
-    arc
-    sketch
-    iterm2
-    proxyman
-    # etc...
-  ];
-
-  # or, in home manager:
-  home.packages = with pkgs.casks; [
-    firefox
-    iina
-    utm
-    transmit
-    # etc...
-  ];
 }
 ```
 
 Caveats
 -------
 
-- Apps trying to update themselves will fail. This is intentional, of course -- updates are exclusively managed via Nix.
-- Garbage collection won't work for apps downloaded by `brew2nix` until you grant `nix` Full Disk Access in Privacy & Security, as the apps are protected by macOS under the new "app data protection". (The first time it fails, just go to Privacy & Security, and `nix` will show up there. Grant it access and you should be good to go.)
-- Spotlight and Launchpad won't work with the installed apps properly. Raycast works perfectly though.
-- Might have two instances of apps open when rebuilding (or more if frequently!). Solution is to `darwin-rebuild switch`, then fully reboot (to clean up all running apps), then run GC.
+- Apps trying to update themselves will fail. This is intentional, of course --
+  updates are exclusively managed via Nix.
+- Garbage collection won't work for apps downloaded by `nix-homebrew-casks`
+  until you grant `nix` Full Disk Access in Privacy & Security, as the apps are
+  protected by macOS under the new "app data protection". (The first time it
+  fails, just go to Privacy & Security, and `nix` will show up there. Grant it
+  access and you should be good to go.)
+- Spotlight and Launchpad won't work with the installed apps properly. Raycast
+  works perfectly though.
+- Might have two instances of apps open when rebuilding (or more if
+  frequently!). Solution is to `darwin-rebuild switch`, then fully reboot (to
+  clean up all running apps), then run GC.
 
 To-Do
 -----
