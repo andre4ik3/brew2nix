@@ -111,7 +111,6 @@ def cask_to_package(cask: dict) -> dict:
     return {
         "name": fixup_name(cask["token"]),
         "desktopName": cask["name"][0],
-        # "desktopName": cask["name"][0] if "name" in cask and len(cask["name"]) > 0 else cask["token"],
         "version": cask["version"].split(",")[0],
         "aliases": [fixup_name(alias) for alias in aliases],
         "artifacts": artifacts,
@@ -151,8 +150,7 @@ def main():
     package_names = {alias: package["name"] for package in packages for alias in package["aliases"]}
 
     for package in packages:
-        if package["name"][0] in ["a"]:
-            write_package(package)
+        write_package(package)
 
     with open("package-names.json", "w") as fp:
         json.dump(package_names, fp)

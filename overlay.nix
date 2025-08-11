@@ -8,7 +8,7 @@ let
   inherit (final) lib;
 
   mkPackage = name: let
-    prefix = lib.substring 0 2 (builtins.trace "evaluating ${name}" name);
+    prefix = lib.substring 0 2 name;
     package = lib.importJSON "${data}/packages/${prefix}/${name}.json";
   in final.callPackage ./cask-template.nix { inherit package; };
 

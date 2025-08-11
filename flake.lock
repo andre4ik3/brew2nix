@@ -3,11 +3,11 @@
     "data": {
       "flake": false,
       "locked": {
-        "lastModified": 1754870519,
-        "narHash": "sha256-00RlYn3Twwju0cmWoNqEt0ikYKL9g/nmTLVma0a5kYE=",
+        "lastModified": 1754937277,
+        "narHash": "sha256-d8KtRXYf0XosFZuylGgysfCjUc3KWnyRoU8sgeNh2h8=",
         "owner": "andre4ik3",
         "repo": "brew2nix",
-        "rev": "94278837e9bd63c78557842c32b201b0b8fc9bbf",
+        "rev": "686b8a4a05f78341ac85ed81bc6322b4355a92bd",
         "type": "github"
       },
       "original": {

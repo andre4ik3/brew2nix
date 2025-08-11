@@ -29,7 +29,7 @@ jobs:
 
       - name: "Update casks"
         run: |
-          rm -rf packages cask.json
+          rm -rf packages README.md
           nix-homebrew-casks
 
       - uses: EndBug/add-and-commit@v9
