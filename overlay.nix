@@ -10,7 +10,7 @@ let
   mkPackage = name: let
     prefix = lib.substring 0 2 (builtins.trace "evaluating ${name}" name);
     package = lib.importJSON "${data}/packages/${prefix}/${name}.json";
-  in final.callPackage ./packages/cask-template.nix { inherit package; };
+  in final.callPackage ./cask-template.nix { inherit package; };
 
   # A map of each package name/alias to the canonical package name.
   packageNameMap = lib.importJSON "${data}/package-names.json";
