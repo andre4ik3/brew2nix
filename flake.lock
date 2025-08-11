@@ -3,17 +3,17 @@
     "data": {
       "flake": false,
       "locked": {
-        "lastModified": 1754937277,
-        "narHash": "sha256-d8KtRXYf0XosFZuylGgysfCjUc3KWnyRoU8sgeNh2h8=",
+        "lastModified": 1754937537,
+        "narHash": "sha256-2FENoVTd0buImX/YsKXOBzymnHPdf6j90tyamXqZVuE=",
         "owner": "andre4ik3",
-        "repo": "brew2nix",
-        "rev": "686b8a4a05f78341ac85ed81bc6322b4355a92bd",
+        "repo": "nix-homebrew-casks",
+        "rev": "bc03663fe3dd8d85a2fc9a44401142c2c9cbfe9e",
         "type": "github"
       },
       "original": {
         "owner": "andre4ik3",
         "ref": "data",
-        "repo": "brew2nix",
+        "repo": "nix-homebrew-casks",
         "type": "github"
       }
     },
@@ -34,11 +34,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1754931686,
-        "narHash": "sha256-fUWtX9FSITqQNLWdJoRl3HUxAOQ92oVNJ8nmP2Rsmng=",
+        "lastModified": 1754937576,
+        "narHash": "sha256-3sWA5WJybUE16kIMZ3+uxcxKZY/JRR4DFBqLdSLBo7w=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "fab5f6e818ed1662fb73e4800498342c51ef86b7",
+        "rev": "ddae11e58c0c345bf66efbddbf2192ed0e58f896",
         "type": "github"
       },
       "original": {

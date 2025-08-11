@@ -6,7 +6,7 @@
     flake-compat.url = "github:nix-community/flake-compat";
 
     data = {
-      url = "github:andre4ik3/brew2nix/data";
+      url = "github:andre4ik3/nix-homebrew-casks/data";
       flake = false;
     };
   };

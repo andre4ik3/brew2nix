@@ -83,9 +83,9 @@ pinning the cask versions separately from the code):
     # ... other stuff ...
   };
 
-  outputs = { nix-homebrew-casks, nixpkgs, ... }: {
-    nixosConfigurations.exampleSystem = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
+  outputs = { nix-homebrew-casks, darwin, ... }: {
+    darwinConfigurations.exampleSystem = darwin.lib.darwinSystem {
+      system = "aarch64-darwin";
       modules = [
         ./some-module.nix
         # ... other stuff ...
