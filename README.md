@@ -1,4 +1,4 @@
-nix-homebrew-casks
+Nix Homebrew Casks
 ==================
 
 Exposes Homebrew casks as Nix packages, in a reproducible way, and **without
@@ -25,10 +25,10 @@ Non-exhaustive list of verified packages that work (tested personally):
 - `arc`
 - `iterm2`
 - `firefox`
-  - Caveat: the CLI wrapper script doesn't work (yet)
+  - Caveat: the CLI wrapper script doesn't work
 - `sketch`
 - `zen-browser`
-- `eloston-chromium`
+- `eloston-chromium`/`ungoogled-chromium`
 - `orion`
 - `proxyman`
 - `hoppscotch`
@@ -49,13 +49,16 @@ Non-exhaustive list of verified packages that work (tested personally):
 - `bettertouchtool`
 - `microsoft-word`, `microsoft-excel`, `microsoft-powerpoint` (`.pkg`'s!!)
 - `visual-studio-code`, `vscodium`, `cursor`
+- `apparency`, `suspicious-package` (Caveat: downloads older version)
 - ...probably most `.zip` and `.dmg` packages. Again, check using command above. (no need to install to check, just need Nix installed)
 
 List of stuff that DOESN'T work:
 
-- `apparency`, `suspicious-package`, `istat-menus@6` (No sha256 on the top-level download)
-- `.pkg` files that need to run scripts
+- `istat-menus@6` (No sha256 on the top-level download)
+- `.pkg` files that need to run scripts (they will be skipped)
 - Anything that hard-requires to be in `/Applications` (e.g. `little-snitch` or `secretive`)
+  - Mostly things with system extensions
+  - They will install but probably break at runtime or complain about not being in `/Applications`
 
 Usage
 -----
@@ -68,29 +71,25 @@ pinning the cask versions separately from the code):
   inputs = {
     # ... other stuff ...
 
-    # auto daily-updated cask data from Homebrew servers
     homebrew-casks = {
-      url = "github:andre4ik3/nix-homebrew-casks/data";
-      flake = false;
-    };
-
-    nix-homebrew-casks = {
       url = "github:andre4ik3/nix-homebrew-casks";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.data.follows = "homebrew-casks";
+      # the below input controls the actual cask data, auto-updated daily
+      # update your version pin using `nix flake update homebrew-casks/data`
+      inputs.data.url = "github:andre4ik3/nix-homebrew-casks/data";
     };
 
     # ... other stuff ...
   };
 
-  outputs = { nix-homebrew-casks, darwin, ... }: {
+  outputs = { homebrew-casks, darwin, ... }: {
     darwinConfigurations.exampleSystem = darwin.lib.darwinSystem {
       system = "aarch64-darwin";
       modules = [
         ./some-module.nix
         # ... other stuff ...
         {
-          nixpkgs.overlays = [ nix-homebrew-casks.overlays.default ];
+          nixpkgs.overlays = [ homebrew-casks.overlays.default ];
         }
         # ... other stuff ...
       ];
@@ -115,9 +114,4 @@ Caveats
   frequently!). Solution is to `darwin-rebuild switch`, then fully reboot (to
   clean up all running apps), then run GC.
 
-To-Do
------
-
-- Quarantine maybe? Would it break reproducibility?
-
-[1]: https://formulae.brew.sh/api/cask.json
+[1]: https://formulae.brew.sh/docs/api/

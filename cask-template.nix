@@ -1,7 +1,6 @@
 {
   # base dependencies
   stdenvNoCC,
-  writeText,
   fetchurl,
 
   # package data
@@ -17,18 +16,30 @@
   dmg2img,
 
   darwin,
+  lib,
 }:
 
 let
   inherit (stdenvNoCC.targetPlatform) system;
-  srcArch = package.files.${system};
-  src = if srcArch == null then throw "cask ${package.name} is not available for ${system}" else srcArch;
+
+  src = let
+    srcArch = package.files.${system};
+    src = if srcArch == null then throw "cask ${package.name} has no fixed-output source available for ${system}" else srcArch;
+    differentVersions = package.version != src.version;
+  in lib.warnIf differentVersions ''
+    cask ${package.name} has version ${package.version} but source file has version ${src.version} (most likely the latest version does not have a hash)
+  '' src;
+
+  needsNoPrefix = artifact: artifact ? target -> !(lib.strings.hasInfix "$HOMEBREW_PREFIX") artifact.target;
+
+  apps = lib.filter needsNoPrefix package.artifacts.apps;
+  binaries = lib.filter needsNoPrefix package.artifacts.binaries;
 in
 
 stdenvNoCC.mkDerivation {
   pname = package.name;
   inherit (src) version;
-  inherit (package) desktopName;
+  inherit (package) desktopName meta;
 
   src = fetchurl {
     pname = package.name;
@@ -60,7 +71,7 @@ stdenvNoCC.mkDerivation {
           bsdtar --xattrs -xjpf "$src" --preserve-permissions --xattrs
         fi
         ;;
-      "zlib compressed data")
+      "zlib compressed data" | "lzfse encoded, lzvn compressed")
         #undmg "$src"
         7zz x -snld "$src" || true # ignore "dangerous symlink" errors
         ;;
@@ -68,9 +79,6 @@ stdenvNoCC.mkDerivation {
         # Terribly hacky BUT IT WORKS
         xar -xf "$src"
         find . -name "Payload" -type f -exec sh -c 'cat {} | gunzip -dc | bsdcpio -i' \;
-        ;;
-      "lzfse encoded, lzvn compressed")
-        7zz x -snld "$src" || true # ignore "dangerous symlink" errors
         ;;
       "Zip archive data"* | "data") # backup/fallback in case `file` doesn't know what it is
         bsdunzip "$src"
@@ -92,12 +100,45 @@ stdenvNoCC.mkDerivation {
   installPhase = ''
     EXTRACT_DIR="$TMPDIR/extract"
     APPDIR="$out/Applications"
-
     mkdir -p "$APPDIR"
-    find "$EXTRACT_DIR" -name "*.app" -type d -prune -exec cp -R {} "$APPDIR"/ \;
+
+    # Fixup nested extraction directory
+    contents=("$EXTRACT_DIR"/*)
+    if [ ''${#contents[@]} -eq 1 ] && [ -d "''${contents[0]}" ] && [[ "$(basename "''${contents[0]}")" != *.app ]]; then
+      EXTRACT_DIR="''${contents[0]}"
+    fi
+
+    ${lib.concatMapStringsSep "\n" ({ source, target ? "$APPDIR/", ... }: ''
+      echo "${source}"
+      cp -R "$EXTRACT_DIR"/"${source}" "${target}"
+    '') apps}
+
+    ${lib.concatMapStringsSep "\n" ({ source, target ? "$out/bin/", ... }: ''
+      mkdir -p "$out/bin"
+      ln -s "${source}" "${target}"
+    '') binaries}
+
+    ${lib.optionalString (lib.length apps == 0) ''
+      # Yep... this is how we handle pkg's...
+      # Avoid copying extra apps that aren't the main app, if possible (cough MSAU cough)
+      if [ -d "$EXTRACT_DIR/${package.desktopName}.app" ]; then
+        cp -R "$EXTRACT_DIR/${package.desktopName}.app" "$APPDIR"/
+      else
+        find "$EXTRACT_DIR" -name "*.app" -type d -prune -exec cp -R {} "$APPDIR"/ \;
+      fi
+    ''}
 
     # Clean up some oddities from some extraction methods
-    xattr -cr "$out"
     find "$APPDIR" -name "*:*" -type f -exec rm -f {} \; # this is how 7-zip does xattrs
+
+    # Safeguard in case no output was produced
+    if ! find "$out" -type f -print -quit | grep -q .; then
+      ls -hal "$EXTRACT_DIR"
+      echo "error: no files in output"
+      exit 1
+    fi
+
+    # Remove extended attributes (e.g. quarantine or provenance)
+    xattr -cr "$out"
   '';
 }
