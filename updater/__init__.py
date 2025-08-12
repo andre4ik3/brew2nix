@@ -92,7 +92,7 @@ def get_cask_file(cask: dict, arm: bool) -> dict | None:
 
 def cask_to_package(cask: dict) -> dict:
     """Converts a Homebrew cask into package metadata."""
-    aliases = list({cask["token"], cask["full_token"], *cask["old_tokens"]})
+    aliases = sorted({cask["token"], cask["full_token"], *cask["old_tokens"]})
 
     # Convert artifacts to a friendlier form.
     artifacts = {value: [] for value in ARTIFACT_TYPES.values()}
