@@ -60,15 +60,18 @@ stdenvNoCC.mkDerivation {
 
   unpackPhase = ''
     EXTRACT_DIR="$TMPDIR/extract"
-    mkdir -p "$EXTRACT_DIR"
-    cd "$EXTRACT_DIR"
+    TEMP_EXTRACT_DIR="$(mktemp -d)"
+    pushd "$TEMP_EXTRACT_DIR"
+
     type="$(file -b "$src")"
+    do_fixup=0
     case "$type" in
       "bzip2 compressed data"*)
         # either it's a tar.bz2 or a dmg...
         if dmg2img -l "$src"; then
           echo "looks like a dmg"
           7zz x -snld "$src" || true # ignore "dangerous symlink" errors
+          do_fixup=1
         else
           echo "looks like a tar"
           bsdtar --xattrs -xjpf "$src" --preserve-permissions --xattrs
@@ -77,11 +80,13 @@ stdenvNoCC.mkDerivation {
       "zlib compressed data" | "lzfse encoded, lzvn compressed")
         #undmg "$src"
         7zz x -snld "$src" || true # ignore "dangerous symlink" errors
+        do_fixup=1
         ;;
       "xar archive compressed"*)
         # Terribly hacky BUT IT WORKS
         xar -xf "$src"
         find . -name "Payload" -type f -exec sh -c 'cat {} | gunzip -dc | bsdcpio -i' \;
+        do_fixup=1
         ;;
       "Zip archive data"* | "data") # backup/fallback in case `file` doesn't know what it is
         bsdunzip "$src"
@@ -91,6 +96,14 @@ stdenvNoCC.mkDerivation {
         exit 1
         ;;
     esac
+
+    # Fixup nested extraction directory
+    contents=("$TEMP_EXTRACT_DIR"/*)
+    if [ "$do_fixup" = "1" ] && [ ''${#contents[@]} -eq 1 ] && [ -d "''${contents[0]}" ] && [[ "$(basename "''${contents[0]}")" != *.app ]]; then
+      TEMP_EXTRACT_DIR="''${contents[0]}"
+    fi
+
+    mv "$TEMP_EXTRACT_DIR" "$EXTRACT_DIR"
   '';
 
   dontPatch = true;
@@ -104,12 +117,6 @@ stdenvNoCC.mkDerivation {
     EXTRACT_DIR="$TMPDIR/extract"
     APPDIR="$out/Applications"
     mkdir -p "$APPDIR"
-
-    # Fixup nested extraction directory
-    contents=("$EXTRACT_DIR"/*)
-    if [ ''${#contents[@]} -eq 1 ] && [ -d "''${contents[0]}" ] && [[ "$(basename "''${contents[0]}")" != *.app ]]; then
-      EXTRACT_DIR="''${contents[0]}"
-    fi
 
     ${lib.concatMapStringsSep "\n" ({ source, target ? "$APPDIR/", ... }: ''
       echo "${source}"

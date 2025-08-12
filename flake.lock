@@ -3,11 +3,11 @@
     "data": {
       "flake": false,
       "locked": {
-        "lastModified": 1754991466,
-        "narHash": "sha256-A0QbPqRpXzRx9fPsJMXkdVEjGe4CW7zKc3Idxg4RxX0=",
+        "lastModified": 1754992635,
+        "narHash": "sha256-1ERC7AzSlwMapQXOsaiVpsoqA6aag0owFLgLS185xlI=",
         "owner": "andre4ik3",
         "repo": "nix-homebrew-casks",
-        "rev": "aa599ec499c983e25a5aa880bf8303782e8293ff",
+        "rev": "aea2cde908831a5bb93d9216e19efd08e2106c6d",
         "type": "github"
       },
       "original": {
