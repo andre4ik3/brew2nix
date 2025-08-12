@@ -30,20 +30,23 @@ let
     cask ${package.name} has version ${package.version} but source file has version ${src.version} (most likely the latest version does not have a hash)
   '' src;
 
-  needsNoPrefix = artifact: artifact ? target -> !(lib.strings.hasInfix "$HOMEBREW_PREFIX") artifact.target;
-
-  apps = lib.filter needsNoPrefix package.artifacts.apps;
-  binaries = lib.filter needsNoPrefix package.artifacts.binaries;
+  artifacts = let
+    needsNoPrefix = artifact: artifact ? target -> !(lib.strings.hasInfix "$HOMEBREW_PREFIX") artifact.target;
+  in lib.mapAttrs (name: lib.filter needsNoPrefix) package.artifacts;
 in
 
 stdenvNoCC.mkDerivation {
   pname = package.name;
   inherit (src) version;
-  inherit (package) desktopName meta;
+  inherit (package) desktopName;
 
   src = fetchurl {
     pname = package.name;
     inherit (src) version url hash;
+  };
+
+  meta = package.meta // lib.optionalAttrs (lib.length artifacts.binaries != 0) {
+    mainProgram = lib.last (lib.splitString "/" (lib.elemAt artifacts.binaries 0).source);
   };
 
   nativeBuildInputs = [
@@ -111,14 +114,14 @@ stdenvNoCC.mkDerivation {
     ${lib.concatMapStringsSep "\n" ({ source, target ? "$APPDIR/", ... }: ''
       echo "${source}"
       cp -R "$EXTRACT_DIR"/"${source}" "${target}"
-    '') apps}
+    '') artifacts.apps}
 
     ${lib.concatMapStringsSep "\n" ({ source, target ? "$out/bin/", ... }: ''
       mkdir -p "$out/bin"
       ln -s "${source}" "${target}"
-    '') binaries}
+    '') artifacts.binaries}
 
-    ${lib.optionalString (lib.length apps == 0) ''
+    ${lib.optionalString (lib.length artifacts.apps == 0) ''
       # Yep... this is how we handle pkg's...
       # Avoid copying extra apps that aren't the main app, if possible (cough MSAU cough)
       if [ -d "$EXTRACT_DIR/${package.desktopName}.app" ]; then
