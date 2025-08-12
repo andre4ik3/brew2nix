@@ -98,9 +98,12 @@ stdenvNoCC.mkDerivation {
     esac
 
     # Fixup nested extraction directory
-    contents=("$TEMP_EXTRACT_DIR"/*)
-    if [ "$do_fixup" = "1" ] && [ ''${#contents[@]} -eq 1 ] && [ -d "''${contents[0]}" ] && [[ "$(basename "''${contents[0]}")" != *.app ]]; then
-      TEMP_EXTRACT_DIR="''${contents[0]}"
+    if [ "$do_fixup" = "1" ]; then
+      find "$TEMP_EXTRACT_DIR" -name "*:*" -type f -exec rm -f {} \; # this is how 7-zip does xattrs
+      contents=("$TEMP_EXTRACT_DIR"/*)
+      if [ ''${#contents[@]} -eq 1 ] && [ -d "''${contents[0]}" ] && [[ "$(basename "''${contents[0]}")" != *.app ]]; then
+        TEMP_EXTRACT_DIR="''${contents[0]}"
+      fi
     fi
 
     mv "$TEMP_EXTRACT_DIR" "$EXTRACT_DIR"
@@ -137,9 +140,6 @@ stdenvNoCC.mkDerivation {
         find "$EXTRACT_DIR" -name "*.app" -type d -prune -exec cp -R {} "$APPDIR"/ \;
       fi
     ''}
-
-    # Clean up some oddities from some extraction methods
-    find "$APPDIR" -name "*:*" -type f -exec rm -f {} \; # this is how 7-zip does xattrs
 
     # Safeguard in case no output was produced
     if ! find "$out" -type f -print -quit | grep -q .; then
