@@ -110,22 +110,19 @@ def cask_to_package(cask: dict) -> dict:
                 # print(f"?? Unknown artifact type {key} in cask {cask["token"]}: {parameters}")
                 pass
 
-    files = {
-        "aarch64-darwin": get_cask_file(cask, True),
-        "x86_64-darwin": get_cask_file(cask, False),
-    }
-
     return {
         "name": fixup_name(cask["token"]),
         "desktopName": cask["name"][0],
         "version": cask["version"].split(",")[0],
         "aliases": [fixup_name(alias) for alias in aliases],
         "artifacts": artifacts,
-        "files": files,
+        "files": {
+            "aarch64-darwin": get_cask_file(cask, True),
+            "x86_64-darwin": get_cask_file(cask, False),
+        },
         "meta": {
             "description": cask["desc"],
             "homepage": cask["homepage"],
-            "platforms": sorted(files.keys()),
         },
         "passthru": {
             # "cask": cask

@@ -47,6 +47,7 @@ stdenvNoCC.mkDerivation {
 
   meta = package.meta // {
     sourceProvenance = with lib.sourceTypes; [ binaryNativeCode ];
+    platforms = lib.platforms.darwin;
     broken = package.files.${system} == null;
   } // lib.optionalAttrs (lib.length artifacts.binaries != 0) {
     mainProgram = lib.last (lib.splitString "/" (lib.elemAt artifacts.binaries 0).source);
