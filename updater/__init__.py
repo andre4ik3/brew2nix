@@ -54,6 +54,8 @@ def to_sri_hash(algorithm: str, data: str) -> str:
 def get_casks() -> list[dict]:
     """Retrieves the latest cask data from Homebrew."""
     resp = request("GET", CASK_DATA_URL, headers={"User-Agent": USER_AGENT})
+    if resp.status != 200:
+        raise Exception(f"Failed to fetch casks: HTTP {resp.status}")
     return resp.json()
 
 
@@ -108,19 +110,23 @@ def cask_to_package(cask: dict) -> dict:
                 # print(f"?? Unknown artifact type {key} in cask {cask["token"]}: {parameters}")
                 pass
 
+    files = {
+        "aarch64-darwin": get_cask_file(cask, True),
+        "x86_64-darwin": get_cask_file(cask, False),
+    }
+
     return {
         "name": fixup_name(cask["token"]),
         "desktopName": cask["name"][0],
         "version": cask["version"].split(",")[0],
         "aliases": [fixup_name(alias) for alias in aliases],
         "artifacts": artifacts,
-        "files": {
-            "aarch64-darwin": get_cask_file(cask, True),
-            "x86_64-darwin": get_cask_file(cask, False),
-        },
+        "files": files,
         "meta": {
             "description": cask["desc"],
             "homepage": cask["homepage"],
+            "platforms": sorted(files.keys()),
+            "broken": len(list(filter(lambda x: x is not None, files.values()))) == 0,
         },
         "passthru": {
             # "cask": cask
