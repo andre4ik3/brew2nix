@@ -45,9 +45,11 @@ stdenvNoCC.mkDerivation {
     inherit (src) version url hash;
   };
 
-  meta = package.meta // lib.optionalAttrs (lib.length artifacts.binaries != 0) {
-    mainProgram = lib.last (lib.splitString "/" (lib.elemAt artifacts.binaries 0).source);
+  meta = package.meta // {
     sourceProvenance = with lib.sourceTypes; [ binaryNativeCode ];
+    broken = package.files.${system} == null;
+  } // lib.optionalAttrs (lib.length artifacts.binaries != 0) {
+    mainProgram = lib.last (lib.splitString "/" (lib.elemAt artifacts.binaries 0).source);
   };
 
   nativeBuildInputs = [

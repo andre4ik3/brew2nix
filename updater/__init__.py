@@ -126,7 +126,6 @@ def cask_to_package(cask: dict) -> dict:
             "description": cask["desc"],
             "homepage": cask["homepage"],
             "platforms": sorted(files.keys()),
-            "broken": len(list(filter(lambda x: x is not None, files.values()))) == 0,
         },
         "passthru": {
             # "cask": cask
